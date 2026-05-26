@@ -15,17 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6     # zaktualizowane
+        uses: actions/checkout@v6
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7   # zaktualizowane
-
+        uses: actions/upload-artifact@v7
         with:
           name: github-pages
-          path: '.'                     # cały folder (index.html jest w root)
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
