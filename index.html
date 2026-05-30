@@ -165,7 +165,7 @@ th {
 
   <!-- Dane -->
   <script type="application/json" id="mecze">[
-{"id":1, "round":"Kolejka 1", "team1":"Meksyk", "team2":"RPA", "date":"2026-06-11T21:00:00", "score1":null, "score2":null},
+{"id":1, "round":"Kolejka 1", "team1":"Meksyk", "team2":"RPA", "date":"2026-06-11T21:00:00", "score1":2, "score2":2},
 
   {"id":2, "round":"Kolejka 1", "team1":"Korea Południowa", "team2":"Czechy", "date":"2026-06-12T04:00:00", "score1":null, "score2":null},
   {"id":3, "round":"Kolejka 1", "team1":"Kanada", "team2":"Bośnia i Hercegowina", "date":"2026-06-12T21:00:00", "score1":null, "score2":null},
@@ -312,7 +312,7 @@ th {
   <script type="application/json" id="uczestnicy">[
     {"name":"Radek","winner":"Hiszpania",
     "predictions":{
-"1": {"score1": null, "score2": null},
+"1": {"score1": 1, "score2": 1},
 "2": {"score1": null, "score2": null},
 "3": {"score1": null, "score2": null},
 "4": {"score1": null, "score2": null},
@@ -1404,6 +1404,9 @@ th {
         Object.entries(u.predictions).forEach(([id,typ])=>{
           const wynik = wyniki[id];
           if(!wynik) return;
+          if (typ.score1 === null || typ.score2 === null) {
+      return; // pomijamy całkowicie
+    }
           const [r1,r2] = wynik;
           if(typ.score1===r1 && typ.score2===r2) punkty+=3;
           else if ((typ.score1>typ.score2 && r1>r2)||(typ.score1<typ.score2 && r1<r2)||(typ.score1===typ.score2 && r1===r2)) punkty+=1;
@@ -1461,12 +1464,29 @@ const matchDate = `${day}.${month}.${date.getFullYear()} ${hours}:${minutes}`;
             <tbody>${uczestnicy.map(u=>{
               const typ=u.predictions[m.id];
               if(!typ) return '';
-              let color="";
-              if(wyniki[m.id]){
-                if(typ.score1===wyniki[m.id][0] && typ.score2===wyniki[m.id][1]) color="green";
-                else if((typ.score1>typ.score2 && wyniki[m.id][0]>wyniki[m.id][1])||(typ.score1<typ.score2 && wyniki[m.id][0]<wyniki[m.id][1])||(typ.score1===typ.score2 && wyniki[m.id][0]===wyniki[m.id][1])) color="orange";
-                else color="red";
-              }
+              let color = "";
+
+// Poprawiona logika kolorów
+if (typ.score1 === null || typ.score2 === null) {
+  color = "Szary";                    // Brak typu = zawsze czerwony
+} 
+else if (wyniki[m.id]) {
+  const [r1, r2] = wyniki[m.id];
+  
+  if (typ.score1 === r1 && typ.score2 === r2) {
+    color = "green";                // Dokładny wynik
+  } 
+  else if (
+    (typ.score1 > typ.score2 && r1 > r2) ||
+    (typ.score1 < typ.score2 && r1 < r2) ||
+    (typ.score1 === typ.score2 && r1 === r2)
+  ) {
+    color = "orange";               // Poprawny kierunek
+  } 
+  else {
+    color = "red";                  // Błędny kierunek
+  }
+}
               return `<tr class="${color}"><td>${u.name}</td><td>${typ.score1} - ${typ.score2}</td><td>${wyniki[m.id]?wyniki[m.id][0]+" - "+wyniki[m.id][1]:"?"}</td></tr>`;
             }).join('')}</tbody></table>`;
           matchDiv.innerHTML = tableHTML;
